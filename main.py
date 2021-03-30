@@ -27,6 +27,8 @@ import cv2
 from comet_ml import Experiment
 import config
 
+
+# this is my comment to test
 def main():
 
     #if comet_loaded:
