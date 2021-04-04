@@ -1,4 +1,4 @@
-method: bayes
+method: random
 metric:
   goal: maximize
   name: train/Episode Reward
