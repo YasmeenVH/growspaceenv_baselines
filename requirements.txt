@@ -12,7 +12,7 @@ pybullet
 scipy
 tensorboard
 tqdm
--e git+https://github.com/openai/baselines.git@8c4b3935d1defeaf6d825311e3abd638c6a1158d#egg=baselines
+-e git+https://github.com/openai/baselines.git#egg=baselines
 comet-ml
 sortedcontainers
 sklearn
