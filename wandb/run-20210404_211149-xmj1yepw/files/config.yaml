@@ -1,0 +1,130 @@
+wandb_version: 1
+
+^BRANCH_LENGTH:
+  desc: null
+  value: '0.1111111111111111'
+^BRANCH_THICCNESS:
+  desc: null
+  value: '0.015'
+^FIRST_BRANCH_HEIGHT:
+  desc: null
+  value: '0.24'
+^LIGHT_DIF:
+  desc: null
+  value: '250'
+^LIGHT_WIDTH:
+  desc: null
+  value: '0.25'
+^MAX_BRANCHING:
+  desc: null
+  value: '10'
+^algo:
+  desc: null
+  value: ppo
+^alpha:
+  desc: null
+  value: '0.99'
+^clip_param:
+  desc: null
+  value: '0.1'
+^cuda:
+  desc: null
+  value: 'True'
+^cuda_deterministic:
+  desc: null
+  value: 'False'
+^custom_gym:
+  desc: null
+  value: growspace
+^entropy_coef:
+  desc: null
+  value: '0.01'
+^env_name:
+  desc: null
+  value: GrowSpaceSpotlight-Mnist5-v0
+^eps:
+  desc: null
+  value: 1e-05
+^eval_interval:
+  desc: null
+  value: None
+^gae_lambda:
+  desc: null
+  value: '0.95'
+^gail:
+  desc: null
+  value: 'False'
+^gail_batch_size:
+  desc: null
+  value: '128'
+^gail_epoch:
+  desc: null
+  value: '5'
+^gail_experts_dir:
+  desc: null
+  value: ./gail_experts
+^gamma:
+  desc: null
+  value: '0.99'
+^log_dir:
+  desc: null
+  value: /tmp/gym/
+^log_interval:
+  desc: null
+  value: '10'
+^lr:
+  desc: null
+  value: '0.00025'
+^max_grad_norm:
+  desc: null
+  value: '0.5'
+^no_cuda:
+  desc: null
+  value: 'False'
+^num_env_steps:
+  desc: null
+  value: '1000000.0'
+^num_mini_batch:
+  desc: null
+  value: '32'
+^num_processes:
+  desc: null
+  value: '1'
+^num_steps:
+  desc: null
+  value: '2500'
+^ppo_epoch:
+  desc: null
+  value: '4'
+^recurrent_policy:
+  desc: null
+  value: 'False'
+^save_dir:
+  desc: null
+  value: ./trained_models/
+^save_interval:
+  desc: null
+  value: '100'
+^seed:
+  desc: null
+  value: '1'
+^use_gae:
+  desc: null
+  value: 'True'
+^use_linear_lr_decay:
+  desc: null
+  value: 'True'
+^use_proper_time_limits:
+  desc: null
+  value: 'False'
+^value_loss_coef:
+  desc: null
+  value: '0.5'
+_wandb:
+  desc: null
+  value:
+    cli_version: 0.10.12
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    python_version: 3.8.5
