@@ -1,0 +1,24 @@
+{
+    "os": "Linux-5.4.0-70-generic-x86_64-with-glibc2.29",
+    "python": "3.8.5",
+    "heartbeatAt": "2021-04-05T17:48:12.072417",
+    "startedAt": "2021-04-05T17:48:10.461173",
+    "docker": null,
+    "gpu": "GeForce RTX 2060",
+    "gpu_count": 1,
+    "cpu_count": 12,
+    "cuda": null,
+    "args": [],
+    "state": "running",
+    "codePath": "main.py",
+    "program": "/home/esac/projects/grow_mnist/growspaceenv_baselines/main.py",
+    "git": {
+        "remote": "git@github.com:YasmeenVH/growspaceenv_baselines.git",
+        "commit": "7a6b572e968020beb9cd47dd47da88d141392ce5"
+    },
+    "email": "manuel.delverme@gmail.com",
+    "root": "/home/esac/projects/grow_mnist/growspaceenv_baselines",
+    "host": "kwisat",
+    "username": "esac",
+    "executable": "/home/esac/projects/venv/bin/python"
+}
