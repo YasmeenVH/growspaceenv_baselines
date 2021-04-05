@@ -1,2 +1,6 @@
--e git+https://github.com/openai/gym/#egg=gym
+-e git+https://git@github.com/openai/gym/#egg=gym[nomujoco]
+-e git+ssh://git@github.com/YasmeenVH/growspace.git#egg=growspace
+git+https://git@github.com/ministry-of-silly-code/experiment_buddy.git#egg=experiment_buddy
 matplotlib
+wandb
+baselines
