@@ -44,4 +44,4 @@ python3 -m pip install -r "requirements.txt" --exists-action w -f https://downlo
 
 export XLA_FLAGS=--xla_gpu_cuda_data_dir=/cvmfs/ai.mila.quebec/apps/x86_64/common/cuda/10.1/
 # TODO: the client should send the experiment_buddy version to avoid issues
-wandb agent "$2"
+xvfb-run -s \"-screen 0 1400x900x24\" wandb agent "$2"
