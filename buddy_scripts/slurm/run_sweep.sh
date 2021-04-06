@@ -9,18 +9,19 @@
 #SBATCH --partition=long
 #SBATCH --get-user-env=L
 
+source /etc/profile
 # Module system
 function log() {
   echo -e "\e[32m"[DEPLOY LOG] $1"\e[0m"
 }
 
-source /etc/profile
 log "Refreshing modules..."
 module purge
 module load python/3.7
 module load pytorch/1.7
 module load mujoco
 module load mujoco-py
+module load tensorflow
 
 FOLDER=$SLURM_TMPDIR/src/
 
