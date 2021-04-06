@@ -16,3 +16,4 @@ comet-ml
 sortedcontainers
 sklearn
 numba
+pyglet==1.5.11
