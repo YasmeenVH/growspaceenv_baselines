@@ -16,3 +16,4 @@ comet-ml
 sortedcontainers
 sklearn
 numba
+-e git+http://github.com/pyglet/pyglet
