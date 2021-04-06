@@ -44,7 +44,7 @@ def make_env(env_id, seed, rank, log_dir, allow_early_resets, custom_gym, record
             env = TransposeImage(env, op=[2, 0, 1])
 
         if record:
-            env = gym.wrappers.Monitor(env, "recording", force=True, mode="evaluation")
+            env = gym.wrappers.Monitor(env, "recording", force=True, mode="evaluation", write_upon_reset=True)
 
         return env
 
