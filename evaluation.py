@@ -49,5 +49,6 @@ def evaluate(actor_critic, ob_rms, env_name, seed, num_processes, eval_log_dir, 
     eval_envs.close()
     array2gif.write_gif(images, 'rgbbgr.gif', fps=4)
     config.tensorboard.run.log({"video": wandb.Video('rgbbgr.gif', fps=4, format="gif")}, commit=True)
+    config.tensorboard.run.history._flush()
 
     print(" Evaluation using {} episodes: mean reward {:.5f}\n".format(len(eval_episode_rewards), np.mean(eval_episode_rewards)))
