@@ -8,6 +8,7 @@ import time
 import torch
 import torch.backends.cudnn
 import torch.utils.data
+from gym.spaces.discrete import Discrete
 
 import config
 import wandb
@@ -126,10 +127,15 @@ def main():
     num_updates = int(
         config.num_env_steps) // config.num_steps // config.num_processes
     x = 0
+    action_space_type = envs.action_space
 
     for j in range(num_updates):
 
-        # action_dist = np.zeros(envs.action_space.n)
+        if isinstance(action_space_type, Discrete):
+            action_dist = np.zeros(envs.action_space.n)
+        else:
+            action_dist = envs.action_space
+
         total_num_steps = (j + 1) * config.num_processes * config.num_steps
 
         if config.use_linear_lr_decay:
@@ -149,14 +155,16 @@ def main():
             # episode_light_position.append(action[:, 0])
             # episode_beam_width.append(action[:, 1])
             # action_dist[action] += 1
+            print(action)
+            wandb.log({"action space": action.detach().cpu()[0]}, step=total_num_steps)
 
             for info in infos:
                 if 'episode' in info.keys():
                     episode_rewards.append(info['episode']['r'])
                     episode_length.append(info['episode']['l'])
 
-                    if j % config.log_interval == 0 and len(episode_rewards) > 1:
-                        wandb.log({"Episode Reward": info['episode']['r']}, step=total_num_steps)
+                    # if j % config.log_interval == 0 and len(episode_rewards) > 1:
+                    #     wandb.log({"Episode Reward": info['episode']['r']}, step=total_num_steps)
 
                 if 'new_branches' in info.keys():
                     episode_branches.append(info['new_branches'])
@@ -239,6 +247,9 @@ def main():
         if j % config.log_interval == 0 and len(episode_rewards) > 1:
             end = time.time()
 
+            # data = [[s] for s in scores]
+            # table = wandb.Table(data=data, columns="scores")
+            # wandb.log({'my_histogram': wandb.plot.histogram(table, "scores")})
             # np_hist = np.histogram(np.arange(action_dist.shape[0]), weights=action_dist)
             # wandb.log({"Actions": wandb.Histogram(np_histogram=np_hist)}, step=total_num_steps)
             wandb.log({"Reward Min": np.min(episode_rewards)}, step=total_num_steps)
