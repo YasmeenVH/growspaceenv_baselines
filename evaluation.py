@@ -1,29 +1,20 @@
-import gym
-import gym.wrappers
+import array2gif
 import numpy as np
 import torch
 
+import config
+import wandb
 from a2c_ppo_acktr import utils
 from a2c_ppo_acktr.envs import make_vec_envs
 
 
-def evaluate(actor_critic, ob_rms, env_name, seed, num_processes, eval_log_dir,
-             device, custom_gym):
-    eval_envs = make_vec_envs(env_name, seed + num_processes, num_processes, None, eval_log_dir, device, True, custom_gym, record=True)
+def evaluate(actor_critic, ob_rms, env_name, seed, num_processes, eval_log_dir, device, custom_gym):
+    eval_envs = make_vec_envs(env_name, seed + num_processes, num_processes, None, eval_log_dir, device, True, custom_gym)
 
     vec_norm = utils.get_vec_normalize(eval_envs)
     if vec_norm is not None:
         vec_norm.eval()
         vec_norm.ob_rms = ob_rms
-
-    from gym.envs.classic_control import rendering
-    org_constructor = rendering.Viewer.__init__
-
-    def constructor(self, *args, **kwargs):
-        org_constructor(self, *args, **kwargs)
-        self.window.set_visible(visible=False)
-
-    rendering.Viewer.__init__ = constructor
 
     eval_episode_rewards = []
 
@@ -32,8 +23,10 @@ def evaluate(actor_critic, ob_rms, env_name, seed, num_processes, eval_log_dir,
         num_processes, actor_critic.recurrent_hidden_state_size, device=device)
     eval_masks = torch.zeros(num_processes, 1, device=device)
 
+    images = []
     while len(eval_episode_rewards) < 10:
         with torch.no_grad():
+            images.append(obs[0, -3:, :].squeeze().cpu().numpy())
             _, action, _, eval_recurrent_hidden_states = actor_critic.act(
                 obs,
                 eval_recurrent_hidden_states,
@@ -52,7 +45,9 @@ def evaluate(actor_critic, ob_rms, env_name, seed, num_processes, eval_log_dir,
             if 'episode' in info.keys():
                 eval_episode_rewards.append(info['episode']['r'])
 
+    images.append(obs[0, -3:, :].squeeze().cpu().numpy())
     eval_envs.close()
+    array2gif.write_gif(images, 'rgbbgr.gif', fps=4)
+    config.tensorboard.run.log({"video": wandb.Video('rgbbgr.gif', fps=4, format="gif")}, commit=True)
 
-    print(" Evaluation using {} episodes: mean reward {:.5f}\n".format(
-        len(eval_episode_rewards), np.mean(eval_episode_rewards)))
+    print(" Evaluation using {} episodes: mean reward {:.5f}\n".format(len(eval_episode_rewards), np.mean(eval_episode_rewards)))

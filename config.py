@@ -48,5 +48,5 @@ tensorboard = experiment_buddy.deploy(
     "mila",
     sweep_yaml="sweep.yaml",
     proc_num=10,
-    wandb_kwargs={"monitor_gym": True, "entity": "growspace"}
+    wandb_kwargs={"entity": "growspace"}
 )
