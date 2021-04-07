@@ -7,6 +7,7 @@ import os
 import time
 import torch
 import torch.backends.cudnn
+import torch.utils.data
 
 import config
 import wandb
@@ -74,7 +75,8 @@ def main():
             lr=config.lr,
             eps=config.eps,
             max_grad_norm=config.max_grad_norm,
-            optimizer=config.optimizer
+            optimizer=config.optimizer,
+            momentum=config.momentum
         )
     elif config.algo == 'acktr':
         agent = algo.A2C_ACKTR(
@@ -127,7 +129,8 @@ def main():
 
     for j in range(num_updates):
 
-        action_dist = np.zeros(envs.action_space.n)
+        # action_dist = np.zeros(envs.action_space.n)
+        total_num_steps = (j + 1) * config.num_processes * config.num_steps
 
         if config.use_linear_lr_decay:
             # decrease learning rate linearly
@@ -145,12 +148,15 @@ def main():
             obs, reward, done, infos = envs.step(action)
             # episode_light_position.append(action[:, 0])
             # episode_beam_width.append(action[:, 1])
-            action_dist[action] += 1
+            # action_dist[action] += 1
 
             for info in infos:
                 if 'episode' in info.keys():
                     episode_rewards.append(info['episode']['r'])
                     episode_length.append(info['episode']['l'])
+
+                    if j % config.log_interval == 0 and len(episode_rewards) > 1:
+                        wandb.log({"Episode Reward": info['episode']['r']}, step=total_num_steps)
 
                 if 'new_branches' in info.keys():
                     episode_branches.append(info['new_branches'])
@@ -218,7 +224,7 @@ def main():
 
         # save for every interval-th episode or for the last epoch
         if (j % config.save_interval == 0
-                or j == num_updates - 1) and config.save_dir != "":
+            or j == num_updates - 1) and config.save_dir != "":
             save_path = os.path.join(config.save_dir, config.algo)
             try:
                 os.makedirs(save_path)
@@ -231,12 +237,10 @@ def main():
             ], os.path.join(save_path, config.env_name + ".pt"))
 
         if j % config.log_interval == 0 and len(episode_rewards) > 1:
-            total_num_steps = (j + 1) * config.num_processes * config.num_steps
             end = time.time()
 
-            np_hist = np.histogram(np.arange(action_dist.shape[0]), weights=action_dist)
-            # wandb.add_histogram("Actions",np_hist,total_num_steps)
-            wandb.log({"Actions": wandb.Histogram(np_histogram=np_hist)}, step=total_num_steps)
+            # np_hist = np.histogram(np.arange(action_dist.shape[0]), weights=action_dist)
+            # wandb.log({"Actions": wandb.Histogram(np_histogram=np_hist)}, step=total_num_steps)
             wandb.log({"Reward Min": np.min(episode_rewards)}, step=total_num_steps)
             wandb.log({"Episode Reward": episode_rewards}, step=total_num_steps)
             wandb.log({"Summed Reward": np.sum(episode_rewards)}, step=total_num_steps)
@@ -245,12 +249,13 @@ def main():
             wandb.log({"Number of Mean New Branches": np.mean(episode_branches)}, step=total_num_steps)
             wandb.log({"Number of Max New Branches": np.max(episode_branches)}, step=total_num_steps)
             wandb.log({"Number of Min New Branches": np.min(episode_branches)}, step=total_num_steps)
-            wandb.log({"Number of Mean New Branches of Plant 1": np.mean(episode_branch1)}, step = total_num_steps)
+            wandb.log({"Number of Mean New Branches of Plant 1": np.mean(episode_branch1)}, step=total_num_steps)
             wandb.log({"Number of Mean New Branches of Plant 2": np.mean(episode_branch2)}, step=total_num_steps)
             wandb.log({"Number of Total Displacement of Light": np.sum(episode_light_move)}, step=total_num_steps)
             wandb.log({"Mean Light Displacement": episode_light_move}, step=total_num_steps)
             wandb.log({"Mean Light Width": episode_light_width}, step=total_num_steps)
-            wandb.log({"Number of Steps in Episode with Tree is as close as possible": np.sum(episode_success)},step=total_num_steps)
+            wandb.log({"Number of Steps in Episode with Tree is as close as possible": np.sum(episode_success)},
+                      step=total_num_steps)
             wandb.log({"Number of Total New Branches": np.sum(episode_branches)}, step=total_num_steps)
             wandb.log({"Episode Length Mean ": np.mean(episode_length)}, step=total_num_steps)
             wandb.log({"Episode Length Min": np.min(episode_length)}, step=total_num_steps)
@@ -288,10 +293,12 @@ def main():
         if (config.eval_interval is not None and len(episode_rewards) > 1
                 and j % config.eval_interval == 0):
             ob_rms = getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
-            evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device,  config.custom_gym)
+            evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device,
+                     config.custom_gym)
 
     ob_rms = getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
-    evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device, config.custom_gym)
+    evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device,
+             config.custom_gym)
 
 
 if __name__ == "__main__":

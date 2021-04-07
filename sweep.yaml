@@ -27,6 +27,4 @@ parameters:
     distribution: q_uniform
     min: 100
     max: 400
-  ^optimizer:
-    values: ["adam", "sgd"]
 program: main.py

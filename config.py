@@ -34,7 +34,7 @@ log_interval = 10
 save_interval = 100
 eval_interval = None
 num_env_steps = 1e6
-env_name = "GrowSpaceSpotlight-Mnist5-v0"
+env_name = "GrowSpaceEnv-Continuous-v0"
 log_dir = "/tmp/gym/"
 save_dir = "./trained_models/"
 use_proper_time_limits = False
@@ -43,11 +43,12 @@ use_linear_lr_decay = True
 no_cuda = False
 cuda = not no_cuda and torch.cuda.is_available()
 optimizer = "adam"
+momentum = 0.9  # if sgd is used
 
 experiment_buddy.register(locals())
 tensorboard = experiment_buddy.deploy(
-    "mila",
-    sweep_yaml="./sweep.yaml",
+    "",
+    sweep_yaml="",
     proc_num=10,
     wandb_kwargs={"entity": "growspace"}
 )

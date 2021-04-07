@@ -18,6 +18,7 @@ class PPO():
             max_grad_norm=None,
             use_clipped_value_loss=True,
             optimizer="adam",
+            momentum=0.9,
     ):
 
         self.actor_critic = actor_critic
@@ -35,7 +36,7 @@ class PPO():
         if optimizer == "adam":
             self.optimizer = optim.Adam(actor_critic.parameters(), lr=lr, eps=eps)
         elif optimizer == "sgd":
-            self.optimizer = optim.SGD(actor_critic.parameters(), lr=lr, momentum=0.90)
+            self.optimizer = optim.SGD(actor_critic.parameters(), lr=lr, momentum=momentum)
 
     def update(self, rollouts):
         advantages = rollouts.returns[:-1] - rollouts.value_preds[:-1]
