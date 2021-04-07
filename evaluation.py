@@ -8,7 +8,7 @@ from a2c_ppo_acktr import utils
 from a2c_ppo_acktr.envs import make_vec_envs
 
 
-def evaluate(actor_critic, ob_rms, env_name, seed, num_processes, eval_log_dir, device, custom_gym):
+def evaluate(actor_critic, ob_rms, env_name, seed, num_processes, eval_log_dir, device, custom_gym, gif=False):
     eval_envs = make_vec_envs(env_name, seed + num_processes, num_processes, None, eval_log_dir, device, True, custom_gym)
 
     vec_norm = utils.get_vec_normalize(eval_envs)
@@ -47,8 +47,9 @@ def evaluate(actor_critic, ob_rms, env_name, seed, num_processes, eval_log_dir, 
 
     images.append(obs[0, -3:, :].squeeze().cpu().numpy())
     eval_envs.close()
-    array2gif.write_gif(images, 'rgbbgr.gif', fps=4)
-    config.tensorboard.run.log({"video": wandb.Video('rgbbgr.gif', fps=4, format="gif")}, commit=True)
-    config.tensorboard.run.history._flush()
+    if gif:
+        array2gif.write_gif(images, 'replay.gif', fps=4)
+        config.tensorboard.run.log({"video": wandb.Video('replay.gif', fps=4, format="gif")}, commit=True)
+        config.tensorboard.run.history._flush()
 
     print(" Evaluation using {} episodes: mean reward {:.5f}\n".format(len(eval_episode_rewards), np.mean(eval_episode_rewards)))

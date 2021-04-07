@@ -73,7 +73,6 @@ def main():
         base,
         base_kwargs={'recurrent': config.recurrent_policy})
     actor_critic.to(device)
-    evaluate(actor_critic, None, config.env_name, config.seed, config.num_processes, eval_log_dir, device, config.custom_gym)
 
     if config.algo == 'a2c':
         agent = algo.A2C_ACKTR(
@@ -354,7 +353,7 @@ def main():
             evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device,  config.custom_gym)
 
     ob_rms = getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
-    evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device, config.custom_gym)
+    evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device, config.custom_gym, gif=True)
 
 
 if __name__ == "__main__":
