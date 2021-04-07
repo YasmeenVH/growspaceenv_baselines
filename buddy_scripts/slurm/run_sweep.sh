@@ -41,9 +41,7 @@ python3 -m pip install --upgrade pip
 
 log "Downloading modules"
 python3 -m pip install -r "requirements.txt" --exists-action w -f https://download.pytorch.org/whl/torch_stable.html
-pip install --ignore-installed -e git+http://github.com/pyglet/pyglet#egg=pyglet
 
 export XLA_FLAGS=--xla_gpu_cuda_data_dir=/cvmfs/ai.mila.quebec/apps/x86_64/common/cuda/10.1/
 # TODO: the client should send the experiment_buddy version to avoid issues
-export DISPLAY=:0
-xvfb-run -a -s "-screen 0 1024x768x24 -ac +extension GLX +render -noreset" wandb agent "$2"
+wandb agent "$2"
