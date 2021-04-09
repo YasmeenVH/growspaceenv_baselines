@@ -1,7 +1,7 @@
 method: random
 metric:
   goal: maximize
-  name: train/Episode Reward
+  name: Episode Reward
 parameters:
   ^FIRST_BRANCH_HEIGHT:
     distribution: uniform
@@ -27,4 +27,7 @@ parameters:
     distribution: q_uniform
     min: 100
     max: 400
+  ^env_name:
+    distribution: categorical
+    values: ["GrowSpaceEnv-Control-v0", "GrowSpaceSpotlight-MnistMix-v0"]
 program: main.py
