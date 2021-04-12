@@ -29,5 +29,5 @@ parameters:
     max: 400
   ^env_name:
     distribution: categorical
-    values: ["GrowSpaceEnv-Control-v0"]
+    values: ["GrowSpaceEnv-Control-v0", "GrowSpaceSpotlight-MnistMix-v0"]
 program: main.py
