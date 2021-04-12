@@ -2,7 +2,7 @@ import torch
 
 import experiment_buddy
 
-FIRST_BRANCH_HEIGHT = .24
+FIRST_BRANCH_HEIGHT = .42
 BRANCH_THICCNESS = 0.015
 BRANCH_LENGTH = 1 / 9
 MAX_BRANCHING = 10
@@ -34,7 +34,7 @@ log_interval = 10
 save_interval = 100
 eval_interval = None
 num_env_steps = 1e6
-env_name = "GrowSpaceSpotlight-Mnist4-v0"
+env_name = "GrowSpaceEnv-Control-v0"#"GrowSpaceSpotlight-Mnist4-v0"
 log_dir = "/tmp/gym/"
 save_dir = "./trained_models/"
 use_proper_time_limits = False
@@ -46,7 +46,7 @@ cuda = not no_cuda and torch.cuda.is_available()
 experiment_buddy.register(locals())
 tensorboard = experiment_buddy.deploy(
     "mila",
-    sweep_yaml="",
-    proc_num=1,
+    sweep_yaml="sweep.yaml",
+    proc_num=10,
     wandb_kwargs={"entity": "growspace"}
 )
