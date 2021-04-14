@@ -240,7 +240,7 @@ def main():
             end = time.time()
 
             if isinstance(action_space_type, Discrete):
-                wandb.log({'my_histogram': wandb.plot.histogram(table, "scores")})
+                np_hist = np.histogram(np.arange(action_dist.shape[0]), weights=action_dist)
                 wandb.log({"Discrete Actions": wandb.Histogram(np_histogram=np_hist)}, step=total_num_steps)
             wandb.log({"Reward Min": np.min(episode_rewards)}, step=total_num_steps)
             wandb.log({"Episode Reward": episode_rewards}, step=total_num_steps)
