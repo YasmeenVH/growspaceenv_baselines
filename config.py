@@ -2,7 +2,7 @@ import torch
 
 import experiment_buddy
 
-FIRST_BRANCH_HEIGHT = .24
+FIRST_BRANCH_HEIGHT = .42
 BRANCH_THICCNESS = 0.015
 BRANCH_LENGTH = 1 / 9
 MAX_BRANCHING = 10
@@ -47,8 +47,8 @@ momentum = 0.9  # if sgd is used
 
 experiment_buddy.register(locals())
 tensorboard = experiment_buddy.deploy(
-    "",
-    sweep_yaml="",
+    "mila",
+    sweep_yaml="./sweep_continuous.yaml",
     proc_num=10,
     wandb_kwargs={"entity": "growspace"}
 )
