@@ -1,10 +1,9 @@
-from collections import deque
-
-import cv2
 import logging
-import numpy as np
 import os
 import time
+
+import cv2
+import numpy as np
 import torch
 import torch.backends.cudnn
 import torch.utils.data
@@ -54,7 +53,6 @@ def main():
         base,
         base_kwargs={'recurrent': config.recurrent_policy})
     actor_critic.to(device)
-    evaluate(actor_critic, None, config.env_name, config.seed, config.num_processes, eval_log_dir, device, config.custom_gym)
 
     if config.algo == 'a2c':
         agent = algo.A2C_ACKTR(
@@ -120,9 +118,6 @@ def main():
     episode_light_position = []
     episode_beam_width = []
 
-    episode_success_rate = deque(maxlen=100)
-    episode_total = 0
-
     start = time.time()
     num_updates = int(
         config.num_env_steps) // config.num_steps // config.num_processes
@@ -154,17 +149,14 @@ def main():
             obs, reward, done, infos = envs.step(action)
             # episode_light_position.append(action[:, 0])
             # episode_beam_width.append(action[:, 1])
-            # action_dist[action] += 1
-            print(action)
-            wandb.log({"action space": action.detach().cpu()[0]}, step=total_num_steps)
+
+            if isinstance(action_space_type, Discrete):
+                action_dist[action] += 1
 
             for info in infos:
                 if 'episode' in info.keys():
                     episode_rewards.append(info['episode']['r'])
                     episode_length.append(info['episode']['l'])
-
-                    # if j % config.log_interval == 0 and len(episode_rewards) > 1:
-                    #     wandb.log({"Episode Reward": info['episode']['r']}, step=total_num_steps)
 
                 if 'new_branches' in info.keys():
                     episode_branches.append(info['new_branches'])
@@ -247,11 +239,9 @@ def main():
         if j % config.log_interval == 0 and len(episode_rewards) > 1:
             end = time.time()
 
-            # data = [[s] for s in scores]
-            # table = wandb.Table(data=data, columns="scores")
-            # wandb.log({'my_histogram': wandb.plot.histogram(table, "scores")})
-            # np_hist = np.histogram(np.arange(action_dist.shape[0]), weights=action_dist)
-            # wandb.log({"Actions": wandb.Histogram(np_histogram=np_hist)}, step=total_num_steps)
+            if isinstance(action_space_type, Discrete):
+                wandb.log({'my_histogram': wandb.plot.histogram(table, "scores")})
+                wandb.log({"Discrete Actions": wandb.Histogram(np_histogram=np_hist)}, step=total_num_steps)
             wandb.log({"Reward Min": np.min(episode_rewards)}, step=total_num_steps)
             wandb.log({"Episode Reward": episode_rewards}, step=total_num_steps)
             wandb.log({"Summed Reward": np.sum(episode_rewards)}, step=total_num_steps)
@@ -286,9 +276,6 @@ def main():
                   f"training episodes: mean/median reward {np.mean(episode_rewards)}/{np.median(episode_rewards)}, \n"
                   f"min/max reward {np.min(episode_rewards)}/{np.max(episode_rewards)}, \n"
                   f"dist_entropy: {dist_entropy}, value_loss: {value_loss}, action_loss: {action_loss}")
-
-            # gif, gif_filepath = create_render_for_comet(args, actor_critic)
-            # experiment.log_asset(gif_filepath)
 
             episode_rewards.clear()
             episode_length.clear()
