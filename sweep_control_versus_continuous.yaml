@@ -4,33 +4,9 @@ metric:
   goal: maximize
   name: Episode_Reward
 parameters:
-  ^FIRST_BRANCH_HEIGHT:
-    distribution: uniform
-    min: 0.05
-    max: 0.5
-  ^BRANCH_THICCNESS:
-    distribution: uniform
-    min: 0.015
-    max: 0.05
-  ^BRANCH_LENGTH:
-    distribution: uniform
-    min: 0.033
-    max: 0.2
-  ^MAX_BRANCHING:
-    distribution: q_uniform
-    min: 1
-    max: 20
-  ^LIGHT_WIDTH:
-    distribution: uniform
-    min: 0.1
-    max: 1
-  ^LIGHT_DIF :
-    distribution: q_uniform
-    min: 100
-    max: 400
   ^lr:
     distribution: uniform
-    min: 1.0e-12
+    min: 1.0e-5
     max: 0.1
   ^eps:
     distribution: uniform
@@ -52,16 +28,16 @@ parameters:
       - False
   ^gae_lambda:
     distribution: uniform
-    min: 0.1
+    min: 0.3
     max: 0.99
   ^entropy_coef:
     distribution: uniform
-    min: 0.001
+    min: 0.01
     max: 0.5
   ^value_loss_coef:
     distribution: uniform
-    min: 0.01
-    max: 0.9
+    min: 0.25
+    max: 0.75
   ^max_grad_norm:
     distribution: uniform
     min: 0.1
@@ -80,8 +56,18 @@ parameters:
     max: 100
   ^clip_param:
     distribution: uniform
-    min: 0.01
-    max: 0.9
+    min: 0.05
+    max: 0.5
+  ^seed:
+    distribution: categorical
+    values: [111,222,333]
+  ^optimizer:
+    distribution: categorical
+    values: ["adam", "sgd"]
+  ^momentum:
+    distribution: uniform
+    min: 0.95
+    max: 0.999
   ^env_name:
     distribution: categorical
     values: ["GrowSpaceEnv-Control-v0", "GrowSpaceEnv-Continuous-v0"]

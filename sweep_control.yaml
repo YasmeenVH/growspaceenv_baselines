@@ -1,0 +1,71 @@
+program: main.py
+method: random
+metric:
+  goal: maximize
+  name: Episode_Reward
+parameters:
+  ^lr:
+    distribution: uniform
+    min: 1.0e-5
+    max: 0.1
+  ^eps:
+    distribution: uniform
+    min: 1e-7
+    max: 0.05
+  ^gamma:
+    distribution: uniform
+    min: 0.1
+    max: 0.99
+  ^use_gae:
+    distribution: categorical
+    values:
+      - True
+      - False
+  ^use_linear_lr_decay:
+    distribution: categorical
+    values:
+      - True
+      - False
+  ^gae_lambda:
+    distribution: uniform
+    min: 0.3
+    max: 0.99
+  ^entropy_coef:
+    distribution: uniform
+    min: 0.01
+    max: 0.5
+  ^value_loss_coef:
+    distribution: uniform
+    min: 0.25
+    max: 0.75
+  ^max_grad_norm:
+    distribution: uniform
+    min: 0.1
+    max: 0.9
+  ^num_steps:
+    distribution: q_uniform
+    min: 1000
+    max: 5000
+  ^ppo_epoch:
+    distribution: q_uniform
+    min: 1
+    max: 20
+  ^num_mini_batch:
+    distribution: q_uniform
+    min: 10
+    max: 100
+  ^clip_param:
+    distribution: uniform
+    min: 0.05
+    max: 0.5
+  ^seed:
+    distribution: categorical
+    values: [111,222,333]
+  ^optimizer:
+    distribution: categorical
+    values: ["adam", "sgd"]
+  ^momentum:
+    distribution: uniform
+    min: 0.95
+    max: 0.999
+  
