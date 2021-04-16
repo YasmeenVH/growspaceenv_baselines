@@ -1,7 +1,7 @@
 method: random
 metric:
   goal: maximize
-  name: Episode Reward
+  name: Episode_Reward
 parameters:
   ^FIRST_BRANCH_HEIGHT:
     distribution: uniform
