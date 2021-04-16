@@ -4,6 +4,8 @@ import os
 import time
 import torch
 import torch.backends.cudnn
+import torch.utils.data
+from gym.spaces.discrete import Discrete
 
 import config
 import wandb
@@ -70,7 +72,10 @@ def main():
             config.entropy_coef,
             lr=config.lr,
             eps=config.eps,
-            max_grad_norm=config.max_grad_norm)
+            max_grad_norm=config.max_grad_norm,
+            optimizer=config.optimizer,
+            momentum=config.momentum
+        )
     elif config.algo == 'acktr':
         agent = algo.A2C_ACKTR(
             actor_critic, config.value_loss_coef, config.entropy_coef, acktr=True)
@@ -101,27 +106,27 @@ def main():
     rollouts.obs[0].copy_(obs)
     rollouts.to(device)
 
-    episode_rewards = [] #deque(maxlen=50)
-    episode_length = [] #deque(maxlen=50)
-    episode_branches = [] #deque(maxlen=50)
-    episode_branch1 = [] #deque(maxlen=50)
-    episode_branch2 = [] #deque(maxlen=50)
-    episode_light_width = []#deque(maxlen=50)
-    episode_light_move = [] #deque(maxlen=50)
-    episode_success = [] #deque(maxlen=50)
-    #episode_light_move = deque(maxlen=10)
-    #new_branches = []
-    #episode_success_rate = [] #deque(maxlen=100)
-    episode_total = 0
+    episode_rewards = []
+    episode_length = []
+    episode_branches = []
+    episode_branch1 = []
+    episode_branch2 = []
+    episode_light_width = []
+    episode_light_move = []
+    episode_success = []
 
     start = time.time()
     num_updates = int(
         config.num_env_steps) // config.num_steps // config.num_processes
-    #print("what are the num_updates",num_updates)
     x = 0
-    #s = 0
-    #av_ep_move = []
+    action_space_type = envs.action_space
+
     for j in range(num_updates):
+
+        if isinstance(action_space_type, Discrete):
+            action_dist = np.zeros(envs.action_space.n)
+
+        total_num_steps = (j + 1) * config.num_processes * config.num_steps
 
         if config.use_linear_lr_decay:
             # decrease learning rate linearly
@@ -130,10 +135,6 @@ def main():
                 agent.optimizer.lr if config.algo == "acktr" else config.lr)
         #new_branches = []
         for step in range(config.num_steps):
-            #if s == 0:
-                #light_move_ep = []
-            #s +=1
-            # Sample actions
             with torch.no_grad():
                 value, action, action_log_prob, recurrent_hidden_states = actor_critic.act(
                     rollouts.obs[step], rollouts.recurrent_hidden_states[step],
@@ -141,21 +142,19 @@ def main():
 
             # Obser reward and next obs
             obs, reward, done, infos = envs.step(action)
-            #misc = {"tips": tips, "target": self.target, "light": self.x1_light, "light width": LIGHT_WIDTH, "step": self.steps. "new_branches": self.new_branches}
+
+            if isinstance(action_space_type, Discrete):
+                action_dist[action] += 1
 
             for info in infos:
-                #print("what is info:",info.keys())
                 if 'episode' in info.keys():
                     episode_rewards.append(info['episode']['r'])
                     episode_length.append(info['episode']['l'])
-                    #print("ep rewards:", episode_rewards)
+                    wandb.log({"Episode Reward": info['episode']['r']}, step=total_num_steps)
 
                 if 'new_branches' in info.keys():
                     episode_branches.append(info['new_branches'])
-                    #print("what is in new branches", info['new_branches'])
-                    # print("type of data:", type(info['new_branches']))
 
-                    #print("what is new branches", new_branches)
                 if 'new_b1' in info.keys():
                     episode_branch1.append(info['new_b1'])
 
@@ -164,16 +163,12 @@ def main():
 
                 if 'light_width' in info.keys():
                     episode_light_width.append(info['light_width'])
-                    #print("what is new branches", new_branches)
 
                 if 'light_move' in info.keys():
                     episode_light_move.append(info['light_move'])
-                    #light_move_ep.append(info['light_move'])
-                    #print("what is new branches", new_branches)
 
                 if 'success' in info.keys():
                     episode_success.append(info['success'])
-                    # print("what is new branches", new_branches)
 
                 if j == x:
                     if 'img' in info.keys():
@@ -181,11 +176,6 @@ def main():
                         path = './hittiyas/growspaceenv_braselines/scripts/imgs/'
                         cv2.imwrite(os.path.join(path, 'step' + str(step) + '.png'), img)
                     x += 1000
-
-            #if s == 50:
-                #av = np.mean(light_move_ep)
-                #av_ep_move.append(av)
-                #s = 0
 
             # If done then clean the history of observations.
             masks = torch.FloatTensor(
@@ -200,10 +190,7 @@ def main():
             next_value = actor_critic.get_value(
                 rollouts.obs[-1], rollouts.recurrent_hidden_states[-1],
                 rollouts.masks[-1]).detach()
-        #print("before")
-        #episode_branches.append(np.asarray([[np.mean(new_branches)]]))
-        #print("after")
-        #print(episode_branches)
+
         if config.gail:
             if j >= 10:
                 envs.venv.eval()
@@ -227,7 +214,6 @@ def main():
 
         rollouts.after_update()
 
-
         # save for every interval-th episode or for the last epoch
         if (j % config.save_interval == 0
                 or j == num_updates - 1) and config.save_dir != "":
@@ -243,10 +229,12 @@ def main():
             ], os.path.join(save_path, config.env_name + ".pt"))
 
         if j % config.log_interval == 0 and len(episode_rewards) > 1:
-            total_num_steps = (j + 1) * config.num_processes * config.num_steps
             end = time.time()
+
+            if isinstance(action_space_type, Discrete):
+                np_hist = np.histogram(np.arange(action_dist.shape[0]), weights=action_dist)
+                wandb.log({"Discrete Actions": wandb.Histogram(np_histogram=np_hist)}, step=total_num_steps)
             wandb.log({"Reward Min": np.min(episode_rewards)}, step=total_num_steps)
-            wandb.log({"Episode Reward": episode_rewards}, step=total_num_steps)
             wandb.log({"Summed Reward": np.sum(episode_rewards)}, step=total_num_steps)
             wandb.log({"Reward Mean": np.mean(episode_rewards)}, step=total_num_steps)
             wandb.log({"Reward Max": np.max(episode_rewards)}, step=total_num_steps)
@@ -258,62 +246,14 @@ def main():
             wandb.log({"Number of Total Displacement of Light": np.sum(episode_light_move)}, step=total_num_steps)
             wandb.log({"Mean Light Displacement": episode_light_move}, step=total_num_steps)
             wandb.log({"Mean Light Width": episode_light_width}, step=total_num_steps)
-            wandb.log({"Number of Steps in Episode with Tree is as close as possible": np.sum(episode_success)},step=total_num_steps)
+            wandb.log({"Number of Steps in Episode with Tree is as close as possible": np.sum(episode_success)},
+                      step=total_num_steps)
+            wandb.log({"Entropy": dist_entropy}, step=total_num_steps)
+            wandb.log({"Displacement of Light Position": wandb.Histogram(episode_light_move)},
+                      step=total_num_steps)
+            wandb.log({"Displacement of Beam Width": wandb.Histogram(episode_light_width)}, step=total_num_steps)
 
 
-            # if experiment is not None:
-            #     experiment.log_metric(
-            #         "Reward Mean",
-            #         np.mean(episode_rewards),
-            #         step=total_num_steps)
-            #     experiment.log_metric(
-            #         "Reward Min", np.min(episode_rewards), step=total_num_steps)
-            #     experiment.log_metric(
-            #         "Reward Max", np.max(episode_rewards), step=total_num_steps)
-            #     experiment.log_metric(
-            #         "Number of Mean New Branches", np.mean(episode_branches), step=total_num_steps)
-            #     experiment.log_metric(
-            #         "Number of Total New Branches", np.sum(episode_branches), step=total_num_steps)
-            #     experiment.log_metric(
-            #         "Number of Min New Branches", np.min(episode_branches), step=total_num_steps)
-            #     experiment.log_metric(
-            #         "Number of Max New Branches", np.max(episode_branches), step=total_num_steps)
-            #
-            #     experiment.log_metric(
-            #         "Number of Mean New Branches of Plant 1", np.mean(episode_branch1), step=total_num_steps)
-            #     experiment.log_metric(
-            #         "Number of Mean New Branches of Plant 2", np.mean(episode_branch2), step=total_num_steps)
-            #
-            #     experiment.log_metric(
-            #         "Number of Total Displacement of Light", np.sum(episode_light_move), step=total_num_steps)
-            #     experiment.log_metric(
-            #         "Mean Displacement of Light", np.mean(episode_light_move), step=total_num_steps)
-            #     experiment.log_metric(
-            #         "Mean Light Width", np.mean(episode_light_width), step=total_num_steps)
-            #     experiment.log_metric(
-            #         "Number of Steps in Episode with Tree is as close as possible", np.sum(episode_success), step=total_num_steps)
-            #     experiment.log_metric(
-            #         "Episode Length Mean ",
-            #         np.mean(episode_length),
-            #         step=total_num_steps)
-            #     experiment.log_metric(
-            #         "Episode Length Min",
-            #         np.min(episode_length),
-            #         step=total_num_steps)
-            #     experiment.log_metric(
-            #         "Episode Length Max",
-            #         np.max(episode_length),
-            #         step=total_num_steps)
-
-            #print("Number of mean branches", np.mean(episode_branches))
-            print(
-                "Updates {}, num timesteps {}, FPS {} \n Last {} training episodes: mean/median reward {:.1f}/{:.1f}, min/max reward {:.1f}/{:.1f}\n"
-                .format(j, total_num_steps,
-                        int(total_num_steps / (end - start)),
-                        len(episode_rewards), np.mean(episode_rewards),
-                        np.median(episode_rewards), np.min(episode_rewards),
-                        np.max(episode_rewards), dist_entropy, value_loss,
-                        action_loss))
             episode_rewards.clear()
             episode_length.clear()
             episode_branches.clear()
