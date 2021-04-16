@@ -115,8 +115,6 @@ def main():
     episode_light_width = []
     episode_light_move = []
     episode_success = []
-    episode_light_position = []
-    episode_beam_width = []
 
     start = time.time()
     num_updates = int(
@@ -147,8 +145,6 @@ def main():
 
             # Obser reward and next obs
             obs, reward, done, infos = envs.step(action)
-            # episode_light_position.append(action[:, 0])
-            # episode_beam_width.append(action[:, 1])
 
             if isinstance(action_space_type, Discrete):
                 action_dist[action] += 1
@@ -157,6 +153,7 @@ def main():
                 if 'episode' in info.keys():
                     episode_rewards.append(info['episode']['r'])
                     episode_length.append(info['episode']['l'])
+                    wandb.log({"Episode Reward": info['episode']['r']}, step=total_num_steps)
 
                 if 'new_branches' in info.keys():
                     episode_branches.append(info['new_branches'])
@@ -172,7 +169,6 @@ def main():
 
                 if 'light_move' in info.keys():
                     episode_light_move.append(info['light_move'])
-                    # print("what is new branches", new_branches)
 
                 if 'success' in info.keys():
                     episode_success.append(info['success'])
@@ -195,10 +191,7 @@ def main():
             next_value = actor_critic.get_value(
                 rollouts.obs[-1], rollouts.recurrent_hidden_states[-1],
                 rollouts.masks[-1]).detach()
-        # print("before")
-        # episode_branches.append(np.asarray([[np.mean(new_branches)]]))
-        # print("after")
-        # print(episode_branches)
+
         if config.gail:
             if j >= 10:
                 envs.venv.eval()
@@ -226,6 +219,7 @@ def main():
         if (j % config.save_interval == 0
             or j == num_updates - 1) and config.save_dir != "":
             save_path = os.path.join(config.save_dir, config.algo)
+            # if os.path.
             try:
                 os.makedirs(save_path)
             except OSError as error:
@@ -240,10 +234,11 @@ def main():
             end = time.time()
 
             if isinstance(action_space_type, Discrete):
-                wandb.log({'my_histogram': wandb.plot.histogram(table, "scores")})
+                np_hist = np.histogram(np.arange(action_dist.shape[0]), weights=action_dist)
                 wandb.log({"Discrete Actions": wandb.Histogram(np_histogram=np_hist)}, step=total_num_steps)
+            else:
+                pass
             wandb.log({"Reward Min": np.min(episode_rewards)}, step=total_num_steps)
-            wandb.log({"Episode Reward": episode_rewards}, step=total_num_steps)
             wandb.log({"Summed Reward": np.sum(episode_rewards)}, step=total_num_steps)
             wandb.log({"Reward Mean": np.mean(episode_rewards)}, step=total_num_steps)
             wandb.log({"Reward Max": np.max(episode_rewards)}, step=total_num_steps)
@@ -262,14 +257,9 @@ def main():
             wandb.log({"Episode Length Min": np.min(episode_length)}, step=total_num_steps)
             wandb.log({"Episode Length Max": np.max(episode_length)}, step=total_num_steps)
             wandb.log({"Entropy": dist_entropy}, step=total_num_steps)
-            wandb.log({"Displacement of Light Position": wandb.Histogram(episode_light_position)}, step=total_num_steps)
-            # experiment.log_histogram_3d(name="Displacement Beam Width", values=episode_beam_width,
-            #                             step=total_num_steps)
-            #
-            # experiment.log_histogram_3d(name="Displacement of Light Move", values=episode_light_move,
-            #                             step=total_num_steps)
-            # experiment.log_histogram_3d(name="Displacement Light Width", values=episode_light_width,
-            #                             step=total_num_steps)
+            wandb.log({"Displacement of Light Position": wandb.Histogram(episode_light_move)},
+                      step=total_num_steps)
+            wandb.log({"Displacement of Beam Width": wandb.Histogram(episode_light_width)}, step=total_num_steps)
 
             print(f"Updates: {j}, timesteps {total_num_steps}, FPS: {int(total_num_steps / (end - start))}, "
                   f"Last reward: {len(episode_rewards)}, \n"
@@ -285,8 +275,6 @@ def main():
             episode_light_width.clear()
             episode_light_move.clear()
             episode_success.clear()
-            episode_light_position.clear()
-            episode_light_width.clear()
 
         if (config.eval_interval is not None and len(episode_rewards) > 1
                 and j % config.eval_interval == 0):
