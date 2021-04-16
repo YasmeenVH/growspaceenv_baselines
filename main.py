@@ -150,7 +150,7 @@ def main():
                 if 'episode' in info.keys():
                     episode_rewards.append(info['episode']['r'])
                     episode_length.append(info['episode']['l'])
-                    wandb.log({"Episode Reward": info['episode']['r']}, step=total_num_steps)
+                    wandb.log({"Episode_Reward": info['episode']['r']}, step=total_num_steps)
 
                 if 'new_branches' in info.keys():
                     episode_branches.append(info['new_branches'])
@@ -229,7 +229,6 @@ def main():
             ], os.path.join(save_path, config.env_name + ".pt"))
 
         if j % config.log_interval == 0 and len(episode_rewards) > 1:
-            end = time.time()
 
             if isinstance(action_space_type, Discrete):
                 np_hist = np.histogram(np.arange(action_dist.shape[0]), weights=action_dist)
