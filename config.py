@@ -46,11 +46,14 @@ recurrent_policy = False
 use_linear_lr_decay = True
 no_cuda = False
 cuda = not no_cuda and torch.cuda.is_available()
+optimizer = "adam"
+momentum = 0.95
+
 
 experiment_buddy.register(locals())
 tensorboard = experiment_buddy.deploy(
-    "mila",
-    sweep_yaml="pposweep.yaml",
-    proc_num=10,
+    "",
+    sweep_yaml="",
+    proc_num=1,
     wandb_kwargs={"entity": "growspace"}
 )
