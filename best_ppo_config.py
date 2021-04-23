@@ -34,7 +34,8 @@ log_interval = 10
 save_interval = 100
 eval_interval = None
 num_env_steps = 1e6
-env_name = "GrowSpaceEnv-Control-v0" # "GrowSpaceEnv-Continuous-v0"
+# env_name = "GrowSpaceEnv-Control-v0" # "GrowSpaceEnv-Continuous-v0"
+env_name = "GrowSpaceEnv-Hierarchy-v0"
 log_dir = "/tmp/gym/"
 save_dir = "./trained_models/"
 use_proper_time_limits = False
@@ -47,8 +48,8 @@ momentum = 0.9  # if sgd is used
 
 experiment_buddy.register(locals())
 tensorboard = experiment_buddy.deploy(
-    "",
+    "mila",
     sweep_yaml="",
-    proc_num=10,
+    proc_num=1,
     wandb_kwargs={"entity": "growspace"}
 )
