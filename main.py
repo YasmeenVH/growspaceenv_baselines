@@ -9,7 +9,7 @@ import torch.backends.cudnn
 import torch.utils.data
 from gym.spaces.discrete import Discrete
 
-import best_ppo_config as config
+import config
 import wandb
 from a2c_ppo_acktr import algo, utils
 from a2c_ppo_acktr.algo import gail
