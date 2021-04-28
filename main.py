@@ -263,7 +263,7 @@ def main():
             wandb.log({"Summed Plant Pixel": np.sum(episode_plantpixel)}, step=total_num_steps)
             wandb.log({"Plant Pixel Histogram": wandb.Histogram(episode_plantpixel)}, step = total_num_steps)
 
-            print(f"Updates: {j}, timesteps {total_num_steps}, FPS: {int(total_num_steps / (end - start))}, "
+            print(f"Updates: {j}, timesteps {total_num_steps},"
                   f"Last reward: {len(episode_rewards)}, \n"
                   f"training episodes: mean/median reward {np.mean(episode_rewards)}/{np.median(episode_rewards)}, \n"
                   f"min/max reward {np.min(episode_rewards)}/{np.max(episode_rewards)}, \n"
