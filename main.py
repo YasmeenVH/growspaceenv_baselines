@@ -114,6 +114,7 @@ def main():
     episode_light_width = []
     episode_light_move = []
     episode_success = []
+    episode_plantpixel = []
 
     start = time.time()
     num_updates = int(
@@ -169,6 +170,9 @@ def main():
 
                 if 'success' in info.keys():
                     episode_success.append(info['success'])
+
+                if 'plant_pixel' in info.keys():
+                    episode_plantpixel.append(info['plant_pixel'])
 
                 if j == x:
                     if 'img' in info.keys():
@@ -251,6 +255,9 @@ def main():
             wandb.log({"Displacement of Light Position": wandb.Histogram(episode_light_move)},
                       step=total_num_steps)
             wandb.log({"Displacement of Beam Width": wandb.Histogram(episode_light_width)}, step=total_num_steps)
+            wandb.log({"Mean Plant Pixel": np.mean(episode_plantpixel)}, step=total_num_steps)
+            wandb.log({"Summed Plant Pixel": np.sum(episode_plantpixel)}, step=total_num_steps)
+            wandb.log({"Plant Pixel Histogram": wandb.Histogram(episode_plantpixel)}, step = total_num_steps)
 
 
             episode_rewards.clear()
@@ -261,6 +268,7 @@ def main():
             episode_light_move.clear()
             episode_light_width.clear()
             episode_success.clear()
+            episode_plantpixel.clear()
 
 
         if (config.eval_interval is not None and len(episode_rewards) > 1
