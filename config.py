@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 import experiment_buddy
 
@@ -9,21 +10,20 @@ MAX_BRANCHING = 10
 LIGHT_WIDTH = .25
 LIGHT_DIF = 250
 
-lr = 0.03955
-eps = 0.03748
-gamma = 0.9013
-use_gae = True
-gae_lambda = 0.412
-entropy_coef = 0.04617
-value_loss_coef = 0.4661
-max_grad_norm = 0.5232
-num_steps = 2286
-optimizer= "adam"
-ppo_epoch = 4
-num_mini_batch = 31
-clip_param = 0.08368
+lr = 0.006697
+eps = 0.03068
+gamma = 0.8964
+use_gae = False
+gae_lambda = 0.3429
+entropy_coef = 0.1316
+value_loss_coef = 0.3638
+max_grad_norm = 0.3406
+num_steps = 4240
+optimizer = "adam"
+ppo_epoch = 15
+num_mini_batch = 25
+clip_param = 0.3758
 use_linear_lr_decay = True
-
 
 algo = "ppo"
 gail = False
@@ -31,7 +31,7 @@ gail_experts_dir = './gail_experts'
 gail_batch_size = 128
 gail_epoch = 5
 alpha = 0.99
-seed = 1
+seed = np.random.randint(1, 80, size=1)  # didnt change
 cuda_deterministic = False
 num_processes = 1
 custom_gym = "growspace"
@@ -39,10 +39,7 @@ log_interval = 10
 save_interval = 100
 eval_interval = None
 num_env_steps = 1e6
-# env_name = "GrowSpaceEnv-Control-v0"
-# env_name = "GrowSpaceEnv-Hierarchy-v0"
-# env_name = "GrowSpaceSpotlight-MnistMix-v0"
-env_name = "GrowSpaceEnv-Fairness-v0"
+env_name = "GrowSpaceSpotlight-MnistMix-v0"
 log_dir = "/tmp/gym/"
 save_dir = "./trained_models/"
 use_proper_time_limits = False
