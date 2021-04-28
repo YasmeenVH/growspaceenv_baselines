@@ -16,4 +16,5 @@ comet-ml
 sortedcontainers
 sklearn
 numba
+python-dateutil
 
