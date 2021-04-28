@@ -11,6 +11,9 @@ log "Refreshing modules..."
 module purge
 module load python/3.7
 module load pytorch/1.7
+module load mujoco
+module load mujoco-py
+module load tensorflow
 
 SCRIPT=$(realpath $0)
 log "script realpath: $SCRIPT"

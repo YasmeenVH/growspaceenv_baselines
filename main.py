@@ -21,6 +21,9 @@ from evaluation import evaluate
 os.environ['OPENCV_IO_MAX_IMAGE_PIXELS'] = str(2 ** 84)
 
 
+os.environ['OPENCV_IO_MAX_IMAGE_PIXELS']=str(2**84)
+
+
 def main():
     wandb.run = config.tensorboard.run
 
@@ -115,6 +118,7 @@ def main():
     episode_light_width = []
     episode_light_move = []
     episode_success = []
+    episode_plantpixel = []
 
     start = time.time()
     num_updates = int(
@@ -173,6 +177,9 @@ def main():
                 if 'success' in info.keys():
                     episode_success.append(info['success'])
 
+                if 'plant_pixel' in info.keys():
+                    episode_plantpixel.append(info['plant_pixel'])
+
                 if j == x:
                     if 'img' in info.keys():
                         img = info['img']
@@ -219,7 +226,6 @@ def main():
         if (j % config.save_interval == 0
             or j == num_updates - 1) and config.save_dir != "":
             save_path = os.path.join(config.save_dir, config.algo)
-            # if os.path.
             try:
                 os.makedirs(save_path)
             except OSError as error:
@@ -231,13 +237,10 @@ def main():
             ], os.path.join(save_path, config.env_name + ".pt"))
 
         if j % config.log_interval == 0 and len(episode_rewards) > 1:
-            end = time.time()
 
             if isinstance(action_space_type, Discrete):
                 np_hist = np.histogram(np.arange(action_dist.shape[0]), weights=action_dist)
                 wandb.log({"Discrete Actions": wandb.Histogram(np_histogram=np_hist)}, step=total_num_steps)
-            else:
-                pass
             wandb.log({"Reward Min": np.min(episode_rewards)}, step=total_num_steps)
             wandb.log({"Summed Reward": np.sum(episode_rewards)}, step=total_num_steps)
             wandb.log({"Reward Mean": np.mean(episode_rewards)}, step=total_num_steps)
@@ -252,14 +255,13 @@ def main():
             wandb.log({"Mean Light Width": episode_light_width}, step=total_num_steps)
             wandb.log({"Number of Steps in Episode with Tree is as close as possible": np.sum(episode_success)},
                       step=total_num_steps)
-            wandb.log({"Number of Total New Branches": np.sum(episode_branches)}, step=total_num_steps)
-            wandb.log({"Episode Length Mean ": np.mean(episode_length)}, step=total_num_steps)
-            wandb.log({"Episode Length Min": np.min(episode_length)}, step=total_num_steps)
-            wandb.log({"Episode Length Max": np.max(episode_length)}, step=total_num_steps)
             wandb.log({"Entropy": dist_entropy}, step=total_num_steps)
             wandb.log({"Displacement of Light Position": wandb.Histogram(episode_light_move)},
                       step=total_num_steps)
             wandb.log({"Displacement of Beam Width": wandb.Histogram(episode_light_width)}, step=total_num_steps)
+            wandb.log({"Mean Plant Pixel": np.mean(episode_plantpixel)}, step=total_num_steps)
+            wandb.log({"Summed Plant Pixel": np.sum(episode_plantpixel)}, step=total_num_steps)
+            wandb.log({"Plant Pixel Histogram": wandb.Histogram(episode_plantpixel)}, step = total_num_steps)
 
             print(f"Updates: {j}, timesteps {total_num_steps}, FPS: {int(total_num_steps / (end - start))}, "
                   f"Last reward: {len(episode_rewards)}, \n"
@@ -270,11 +272,12 @@ def main():
             episode_rewards.clear()
             episode_length.clear()
             episode_branches.clear()
-            episode_branch1.clear()
             episode_branch2.clear()
-            episode_light_width.clear()
+            episode_branch1.clear()
             episode_light_move.clear()
+            episode_light_width.clear()
             episode_success.clear()
+            episode_plantpixel.clear()
 
         if (config.eval_interval is not None and len(episode_rewards) > 1
                 and j % config.eval_interval == 0):
@@ -283,8 +286,7 @@ def main():
                      config.custom_gym)
 
     ob_rms = getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
-    evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device,
-             config.custom_gym)
+    evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device, config.custom_gym, gif=True)
 
 
 if __name__ == "__main__":
