@@ -2,7 +2,6 @@ method: random
 metric:
   goal: maximize
   name: Episode_Reward
-
 parameters:
   ^lr:
     distribution: uniform
@@ -60,7 +59,10 @@ parameters:
     max: 0.5
   ^seed:
     distribution: categorical
-    values: [111,222,333]
+    values:
+      - 111
+      - 222
+      - 333
   ^optimizer:
     distribution: categorical
     values: ["adam", "sgd"]
@@ -68,6 +70,4 @@ parameters:
     distribution: uniform
     min: 0.95
     max: 0.99
-
-
 program: main.py
