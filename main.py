@@ -17,12 +17,12 @@ from a2c_ppo_acktr.envs import make_vec_envs
 from a2c_ppo_acktr.model import Policy
 from a2c_ppo_acktr.storage import RolloutStorage
 from evaluation import evaluate
+from psutil import virtual_memory
+
 
 os.environ['OPENCV_IO_MAX_IMAGE_PIXELS'] = str(2 ** 84)
-
-
-os.environ['OPENCV_IO_MAX_IMAGE_PIXELS']=str(2**84)
-
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print("Device:", device, f"\nRAM: {virtual_memory().total / (1024. ** 3)}")
 
 def main():
     wandb.run = config.tensorboard.run
