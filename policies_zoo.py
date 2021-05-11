@@ -1,4 +1,4 @@
-import best_ppo_config as config
+import config
 
 import os
 
