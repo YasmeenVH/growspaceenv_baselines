@@ -57,7 +57,6 @@ class WandbStableBaselines3Callback(BaseCallback):
         for info in infos:
             if 'episode' in info.keys():
                 self.episode_rewards.append(info['episode']['r'])
-                print(info['episode']['r'], self.locals["iteration"], self.locals["n_steps"], self.locals["n_rollout_steps"])
                 self.episode_length.append(info['episode']['l'])
                 wandb.log({"Episode_Reward": info['episode']['r']}, step=self.count_time_steps)
                 self.count_time_steps += 1
