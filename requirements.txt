@@ -17,3 +17,4 @@ sortedcontainers
 sklearn
 numba
 stable-baselines3[extra]
+threadpoolctl==2.1.0
