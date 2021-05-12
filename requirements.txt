@@ -16,4 +16,4 @@ comet-ml
 sortedcontainers
 sklearn
 numba
-stable-baselines3[extra]
+stable-baselines3
