@@ -19,10 +19,10 @@ from a2c_ppo_acktr.storage import RolloutStorage
 from evaluation import evaluate
 from psutil import virtual_memory
 
-
 os.environ['OPENCV_IO_MAX_IMAGE_PIXELS'] = str(2 ** 84)
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print("Device:", device, f"\nRAM: {virtual_memory().total / (1024. ** 3)}")
+
 
 def main():
     wandb.run = config.tensorboard.run
@@ -261,7 +261,7 @@ def main():
             wandb.log({"Displacement of Beam Width": wandb.Histogram(episode_light_width)}, step=total_num_steps)
             wandb.log({"Mean Plant Pixel": np.mean(episode_plantpixel)}, step=total_num_steps)
             wandb.log({"Summed Plant Pixel": np.sum(episode_plantpixel)}, step=total_num_steps)
-            wandb.log({"Plant Pixel Histogram": wandb.Histogram(episode_plantpixel)}, step = total_num_steps)
+            wandb.log({"Plant Pixel Histogram": wandb.Histogram(episode_plantpixel)}, step=total_num_steps)
 
             print(f"Updates: {j}, timesteps {total_num_steps},"
                   f"Last reward: {len(episode_rewards)}, \n"
@@ -286,7 +286,8 @@ def main():
                      config.custom_gym)
 
     ob_rms = getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
-    evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device, config.custom_gym, gif=True)
+    evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device,
+             config.custom_gym, gif=True)
 
 
 if __name__ == "__main__":
