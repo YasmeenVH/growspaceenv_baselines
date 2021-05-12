@@ -115,6 +115,7 @@ def main():
     episode_light_move = []
     episode_success = []
     episode_plantpixel = []
+    test_episode_branch =[]
 
     start = time.time()
     num_updates = int(
@@ -239,6 +240,7 @@ def main():
                 wandb.log({"Discrete Actions": wandb.Histogram(np_histogram=np_hist)}, step=total_num_steps)
             wandb.log({"Reward Min": np.min(episode_rewards)}, step=total_num_steps)
             wandb.log({"Summed Reward": np.sum(episode_rewards)}, step=total_num_steps)
+            wandb.log({"Step Reward":episode_rewards},step=len(episode_rewards))
             wandb.log({"Reward Mean": np.mean(episode_rewards)}, step=total_num_steps)
             wandb.log({"Reward Max": np.max(episode_rewards)}, step=total_num_steps)
             wandb.log({"Number of Mean New Branches": np.mean(episode_branches)}, step=total_num_steps)
