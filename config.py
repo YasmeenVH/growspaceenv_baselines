@@ -28,7 +28,7 @@ value_loss_coef = 0.5
 max_grad_norm = 0.5
 seed = 1    # didnt change
 cuda_deterministic = False
-num_processes = 1
+num_processes = 4
 num_steps = 2500
 custom_gym = "growspace"
 ppo_epoch = 4
@@ -53,7 +53,7 @@ momentum = 0.95
 experiment_buddy.register(locals())
 tensorboard = experiment_buddy.deploy(
     "mila",
-    sweep_yaml="pposweep.yaml",
-    proc_num=10,
+    sweep_yaml="",
+    proc_num=1,
     wandb_kwargs={"entity": "growspace"}
 )
