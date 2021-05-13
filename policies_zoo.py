@@ -18,10 +18,14 @@ def ppo_stable_baselines_training():
     torch.manual_seed(config.seed)
     torch.cuda.manual_seed_all(config.seed)
 
-    envs = make_vec_env(config.env_name, n_envs=4)
+    envs = make_vec_env(config.env_name, n_envs=config.num_processes)
 
-    model = PPO("CnnPolicy", envs, verbose=1, tensorboard_log="./runs/", clip_range=0.2, n_steps=50)
-    model.learn(total_timesteps=2000, log_interval=1, callback=WandbStableBaselines3Callback())
+    model = PPO(
+        "CnnPolicy", envs, verbose=1, tensorboard_log="./runs/", clip_range=config.clip_param, n_steps=50,
+        learning_rate=config.lr, gamma=config.gamma, gae_lambda=config.gae_lambda, ent_coef=config.entropy_coef,
+        max_grad_norm=config.max_grad_norm, vf_coef=config.value_loss_coef, batch_size=config.num_mini_batch
+    )
+    model.learn(total_timesteps=config.num_steps, log_interval=1, callback=WandbStableBaselines3Callback())
     model.save(f"{config.env_name}_stable_baselines_ppo")
 
 
