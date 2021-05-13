@@ -21,7 +21,7 @@ def ppo_stable_baselines_training():
     envs = make_vec_env(config.env_name, n_envs=config.num_processes)
 
     model = PPO(
-        "CnnPolicy", envs, verbose=1, tensorboard_log="./runs/", clip_range=config.clip_param, n_steps=50,
+        "CnnPolicy", envs, verbose=1, tensorboard_log="./runs/", clip_range=config.clip_param, n_steps=2000,
         learning_rate=config.lr, gamma=config.gamma, gae_lambda=config.gae_lambda, ent_coef=config.entropy_coef,
         max_grad_norm=config.max_grad_norm, vf_coef=config.value_loss_coef, batch_size=config.num_mini_batch
     )
