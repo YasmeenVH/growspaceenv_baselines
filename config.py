@@ -53,7 +53,7 @@ momentum = 0.95
 experiment_buddy.register(locals())
 tensorboard = experiment_buddy.deploy(
     "mila",
-    sweep_yaml="pposweep.yaml",
-    proc_num=10,
+    sweep_yaml="",
+    proc_num=1,
     wandb_kwargs={"entity": "growspace"}
 )
