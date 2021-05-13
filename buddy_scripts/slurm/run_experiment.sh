@@ -41,12 +41,12 @@ fi
 
 log "Using shared venv @ $HOME/venv"
 
-python3 -m pip install --upgrade pip
+python3 -m pip install --verbose --upgrade pip
 
 log "installing experiment_buddy"
-pip3 install -e git+https://github.com/ministry-of-silly-code/experiment_buddy#egg=experiment_buddy
+pip3 install --verbose  -e git+https://github.com/ministry-of-silly-code/experiment_buddy#egg=experiment_buddy
 
-python3 -m pip install -r "requirements.txt" --exists-action w -f https://download.pytorch.org/whl/torch_stable.html
+python3 -m pip install --verbose -r "requirements.txt" --exists-action w -f https://download.pytorch.org/whl/torch_stable.html
 
 export XLA_FLAGS=--xla_gpu_cuda_data_dir=/cvmfs/ai.mila.quebec/apps/x86_64/common/cuda/10.1/
 
