@@ -12,7 +12,7 @@ LIGHT_WIDTH = .25
 LIGHT_DIF = 250
 """
 
-algo = "ppo"  # no change
+algo = "a2c"  # no change
 gail = False   # not important
 gail_experts_dir = './gail_experts'  # not important
 gail_batch_size = 128                # not important
@@ -53,7 +53,7 @@ momentum = 0.95
 experiment_buddy.register(locals())
 tensorboard = experiment_buddy.deploy(
     "mila",
-    sweep_yaml="pposweep.yaml",
-    proc_num=10,
+    sweep_yaml="",
+    proc_num=1,
     wandb_kwargs={"entity": "growspace"}
 )
