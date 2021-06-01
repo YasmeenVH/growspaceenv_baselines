@@ -1,5 +1,5 @@
 import torch
-
+import numpy as np
 import experiment_buddy
 """ 
 old values of growspace 
@@ -12,7 +12,7 @@ LIGHT_WIDTH = .25
 LIGHT_DIF = 250
 """
 
-algo = "ppo"  # no change
+algo = "a2c"  # no change
 gail = False   # not important
 gail_experts_dir = './gail_experts'  # not important
 gail_batch_size = 128                # not important
@@ -26,7 +26,7 @@ gae_lambda = 0.95
 entropy_coef = 0.01
 value_loss_coef = 0.5
 max_grad_norm = 0.5
-seed = 1    # didnt change
+seed = np.random.randint(100)    # didnt change
 cuda_deterministic = False
 num_processes = 1
 num_steps = 2500
@@ -53,7 +53,7 @@ momentum = 0.95
 experiment_buddy.register(locals())
 tensorboard = experiment_buddy.deploy(
     "mila",
-    sweep_yaml="pposweep.yaml",
-    proc_num=10,
+    sweep_yaml="",
+    proc_num=1,
     wandb_kwargs={"entity": "growspace"}
 )
