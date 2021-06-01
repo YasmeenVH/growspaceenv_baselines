@@ -31,7 +31,7 @@ class Policy(nn.Module):
 
         self.base = base(obs_shape, **base_kwargs)  # TODO Lia changed this, the original is the below commendted line
         #self.base = base(obs_shape[0], **base_kwargs)
-        print("obs_shape[0]:", obs_shape[0])
+        print("obs_shape[1]:", obs_shape[1])
         if action_space.__class__.__name__ == "Discrete":
             num_outputs = action_space.n
             self.dist = Categorical(self.base.output_size, num_outputs)
