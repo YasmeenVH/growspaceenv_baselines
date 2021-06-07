@@ -192,15 +192,18 @@ class VecPyTorchFrameStack(VecEnvWrapper):
         self.nstack = nstack
 
         wos = venv.observation_space  # wrapped ob space
-        self.shape_dim0 = wos.shape[0]
+        self.number_of_features = wos.shape[1]
 
-        low = np.repeat(wos.low, self.nstack, axis=0)
-        high = np.repeat(wos.high, self.nstack, axis=0)
+        low, high = wos.low, wos.high
+        low = np.expand_dims(low, 0)
+        high = np.expand_dims(high, 0)
+
+        low = np.repeat(low, self.nstack, axis=0)
+        high = np.repeat(high, self.nstack, axis=0)
 
         if device is None:
             device = torch.device('cpu')
-        self.stacked_obs = torch.zeros((venv.num_envs,) +
-                                       low.shape).to(device)
+        self.stacked_obs = torch.zeros((venv.num_envs,) + low.shape).to(device)
 
         observation_space = gym.spaces.Box(
             low=low, high=high, dtype=venv.observation_space.dtype)
@@ -208,12 +211,12 @@ class VecPyTorchFrameStack(VecEnvWrapper):
 
     def step_wait(self):
         obs, rews, news, infos = self.venv.step_wait()
-        self.stacked_obs[:, :-self.shape_dim0] = \
-            self.stacked_obs[:, self.shape_dim0:].clone()
+        self.stacked_obs[:, :-self.number_of_features] = \
+            self.stacked_obs[:, self.number_of_features:].clone()
         for (i, new) in enumerate(news):
             if new:
                 self.stacked_obs[i] = 0
-        self.stacked_obs[:, -self.shape_dim0:] = obs
+        self.stacked_obs[:, -self.number_of_features:] = obs
         return self.stacked_obs, rews, news, infos
 
     def reset(self):
@@ -222,7 +225,7 @@ class VecPyTorchFrameStack(VecEnvWrapper):
             self.stacked_obs = torch.zeros(self.stacked_obs.shape)
         else:
             self.stacked_obs.zero_()
-        self.stacked_obs[:, -self.shape_dim0:] = obs
+        self.stacked_obs[:, -self.number_of_features:] = obs
         return self.stacked_obs
 
     def close(self):

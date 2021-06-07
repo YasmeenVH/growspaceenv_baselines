@@ -1,14 +1,15 @@
-import cv2
-import numpy as np
 import os
 import time
+
+import cv2
+import numpy as np
 import torch
 import torch.backends.cudnn
 import torch.utils.data
+import wandb
 from gym.spaces.discrete import Discrete
 
 import config
-import wandb
 from a2c_ppo_acktr import algo, utils
 from a2c_ppo_acktr.algo import gail
 from a2c_ppo_acktr.envs import make_vec_envs
@@ -16,11 +17,10 @@ from a2c_ppo_acktr.model import Policy
 from a2c_ppo_acktr.storage import RolloutStorage
 from evaluation import evaluate
 
-os.environ['OPENCV_IO_MAX_IMAGE_PIXELS']=str(2**84)
+os.environ['OPENCV_IO_MAX_IMAGE_PIXELS'] = str(2 ** 84)
 
 
 def main():
-
     wandb.run = config.tensorboard.run
 
     torch.manual_seed(config.seed)
@@ -117,8 +117,7 @@ def main():
     episode_plantpixel = []
 
     start = time.time()
-    num_updates = int(
-        config.num_env_steps) // config.num_steps // config.num_processes
+    num_updates = int(config.num_env_steps) // config.num_steps // config.num_processes
     x = 0
     action_space_type = envs.action_space
 
@@ -134,7 +133,7 @@ def main():
             utils.update_linear_schedule(
                 agent.optimizer, j, num_updates,
                 agent.optimizer.lr if config.algo == "acktr" else config.lr)
-        #new_branches = []
+        # new_branches = []
         for step in range(config.num_steps):
             with torch.no_grad():
                 value, action, action_log_prob, recurrent_hidden_states = actor_critic.act(
@@ -220,7 +219,7 @@ def main():
 
         # save for every interval-th episode or for the last epoch
         if (j % config.save_interval == 0
-                or j == num_updates - 1) and config.save_dir != "":
+            or j == num_updates - 1) and config.save_dir != "":
             save_path = os.path.join(config.save_dir, config.algo)
             try:
                 os.makedirs(save_path)
@@ -244,7 +243,7 @@ def main():
             wandb.log({"Number of Mean New Branches": np.mean(episode_branches)}, step=total_num_steps)
             wandb.log({"Number of Max New Branches": np.max(episode_branches)}, step=total_num_steps)
             wandb.log({"Number of Min New Branches": np.min(episode_branches)}, step=total_num_steps)
-            wandb.log({"Number of Mean New Branches of Plant 1": np.mean(episode_branch1)}, step = total_num_steps)
+            wandb.log({"Number of Mean New Branches of Plant 1": np.mean(episode_branch1)}, step=total_num_steps)
             wandb.log({"Number of Mean New Branches of Plant 2": np.mean(episode_branch2)}, step=total_num_steps)
             wandb.log({"Number of Total Displacement of Light": np.sum(episode_light_move)}, step=total_num_steps)
             wandb.log({"Mean Light Displacement": episode_light_move}, step=total_num_steps)
@@ -257,8 +256,7 @@ def main():
             wandb.log({"Displacement of Beam Width": wandb.Histogram(episode_light_width)}, step=total_num_steps)
             wandb.log({"Mean Plant Pixel": np.mean(episode_plantpixel)}, step=total_num_steps)
             wandb.log({"Summed Plant Pixel": np.sum(episode_plantpixel)}, step=total_num_steps)
-            wandb.log({"Plant Pixel Histogram": wandb.Histogram(episode_plantpixel)}, step = total_num_steps)
-
+            wandb.log({"Plant Pixel Histogram": wandb.Histogram(episode_plantpixel)}, step=total_num_steps)
 
             episode_rewards.clear()
             episode_length.clear()
@@ -270,11 +268,10 @@ def main():
             episode_success.clear()
             episode_plantpixel.clear()
 
-
         if (config.eval_interval is not None and len(episode_rewards) > 1
                 and j % config.eval_interval == 0):
             ob_rms = getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
-            evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device,  config.custom_gym)
+            evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device, config.custom_gym)
 
     ob_rms = getattr(utils.get_vec_normalize(envs), 'ob_rms', None)
     evaluate(actor_critic, ob_rms, config.env_name, config.seed, config.num_processes, eval_log_dir, device, config.custom_gym, gif=True)
